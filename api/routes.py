@@ -35,7 +35,8 @@ async def verificar_cobertura(body: SolicitudCoberturaRequest):
     # 2. Convertir schema → entidad del dominio
     solicitud = SolicitudCobertura(
         direccion=body.direccion,
-        edificio=body.edificio
+        edificio=body.edificio,
+        piso=body.piso
     )
 
     # 3. Ejecutar

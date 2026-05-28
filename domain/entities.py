@@ -34,6 +34,7 @@ class SolicitudCobertura:
     """
     direccion: str
     edificio:  TipoEdificio
+    piso:      Optional[str] = None   # Requerido solo si edificio=true
 
 
 @dataclass

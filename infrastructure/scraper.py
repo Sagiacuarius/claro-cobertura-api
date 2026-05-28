@@ -36,6 +36,7 @@ SEL_DIRECCION       = "#txtBuscarXYGO"
 SEL_POPUP_BTN       = ".leaflet-popup-content button.btnPopUpTrue"
 SEL_MODAL_EDIFICIO  = "#modaledificio"
 SEL_RADIO_EDIFICIO  = 'input[name="edificio"][value="{v}"]'
+SEL_INPUT_PISO      = "#piso"          # Campo de número de piso (visible solo si edificio=true)
 SEL_BTN_CONFIRMAR   = "#confirmarpopup"
 
 
@@ -83,14 +84,20 @@ async def _confirmar_en_mapa(page: Page) -> bool:
         return False
 
 
-async def _responder_modal_edificio(page: Page, edificio: TipoEdificio) -> None:
-    """Responde el modal 'Tu edificio tiene mas de 3 pisos...?'"""
-    logger.info(f"Modal edificio: {edificio.name}")
+async def _responder_modal_edificio(page: Page, edificio: TipoEdificio, piso: str | None) -> None:
+    """Responde el modal 'Tu edificio tiene mas de 3 pisos...?' y llena piso si corresponde."""
+    logger.info(f"Modal edificio: {edificio.name}, piso: {piso}")
     await page.wait_for_selector(SEL_MODAL_EDIFICIO, state="visible", timeout=15000)
 
     # Seleccionar SI o NO
     await page.click(SEL_RADIO_EDIFICIO.format(v=edificio.value))
     await page.wait_for_timeout(500)
+
+    # Si es edificio, llenar el campo de piso (obligatorio en la plataforma)
+    if edificio == TipoEdificio.SI and piso:
+        await page.fill(SEL_INPUT_PISO, piso)
+        await page.wait_for_timeout(300)
+        logger.info(f"Piso {piso} ingresado")
 
     # Confirmar
     await page.click(SEL_BTN_CONFIRMAR)
@@ -194,7 +201,7 @@ class PlaywrightCoberturaAdapter(CoberturaPort):
                         resultado=ResultadoCobertura.ERROR,
                         error="Direccion no reconocida por el geocoder del mapa"
                     )
-                await _responder_modal_edificio(page, solicitud.edificio)
+                await _responder_modal_edificio(page, solicitud.edificio, solicitud.piso)
 
                 # 4. Esperar la respuesta de la API
                 await page.wait_for_timeout(3000)

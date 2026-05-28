@@ -13,12 +13,14 @@ class SolicitudCoberturaRequest(BaseModel):
     """Body del POST que envía n8n."""
     direccion: str
     edificio:  TipoEdificio = TipoEdificio.NO   # default: No
+    piso:      Optional[str] = None             # Requerido solo si edificio=true
 
     model_config = {
         "json_schema_extra": {
             "example": {
                 "direccion": "SANTA FE 1270, CHABAS, CASEROS, SANTA FE",
-                "edificio": "false"
+                "edificio": "true",
+                "piso": "3"
             }
         }
     }
